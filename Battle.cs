@@ -28,7 +28,7 @@ public class Battle
 
     public void MainMenu()
     {
-        ShowStats();
+        ShowStatistics();
         Ui.ShowMenu(new Menu("Affronter un pokémon", new[]
         {
             new MenuItem("Attaquer", Fight),
@@ -37,7 +37,7 @@ public class Battle
         }));
     }
 
-    private void ShowStats()
+    private void ShowStatistics()
     {
         Pokemon[] pokemons = { _pokemon, _wildPokemon };
         StringBuilder sb = new();
@@ -62,7 +62,7 @@ public class Battle
 
     private void Fight()
     {
-        ShowStats();
+        ShowStatistics();
 
         // For now, only use attacks that do damage because the effects are not implemented
         var menuItems = _pokemon.Moves
@@ -114,7 +114,6 @@ public class Battle
                 WonBattle();
                 return;
             }
-
             ExecuteMove(wildMove, _wildPokemon, _pokemon);
             if (_pokemon.Hp.Value == 0)
             {

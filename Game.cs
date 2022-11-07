@@ -40,7 +40,12 @@ public static class Game
                                     _pokemon.Level + 1)))
                             .MainMenu();
                 }),
-                // new MenuItem("Mes pokémon"),
+                // In order to respect the instructions of the exercise
+                new MenuItem("Voir les stats de mon pokémon", () =>
+                {
+                    Ui.PrintNotification(
+                        $"{_pokemon.Name} HP: {_pokemon.Hp.Value}/{_pokemon.MaxHp} LV: {_pokemon.Level} ATK: {_pokemon.Attack.Value} DEF: {_pokemon.Defense.Value} SPD: {_pokemon.Speed.Value} SPC: {_pokemon.Special.Value}");
+                }),
                 new MenuItem("Soigner mon pokémon", Heal)
             }));
             Console.Clear();
