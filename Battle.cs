@@ -47,6 +47,7 @@ public class Battle
         }
 
         Ui.ShowMenu(new Menu("Changer de pokemon", menuItems, MainMenu));
+        MainMenu();
     }
 
     private void ShowStatistics()

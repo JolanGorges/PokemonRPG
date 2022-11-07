@@ -25,9 +25,6 @@ public static class Game
         while (true)
         {
             Console.SetCursorPosition(0, 0);
-            // Console.WriteLine(
-            //     $"{_pokemon.Name} HP: {_pokemon.Hp.Value}/{_pokemon.MaxHp} LV: {_pokemon.Level} ATK: {_pokemon.Attack.Value} DEF: {_pokemon.Defense.Value} SPD: {_pokemon.Speed.Value} SPC: {_pokemon.Special.Value}          ");
-            // Console.WriteLine($"Encore {_pokemon.GetNextLevelExp()} EXP avant le prochain niveau");
             Ui.ShowMenu(new Menu("Menu Principal", new[]
             {
                 new MenuItem("Affronter un pokémon", () =>
