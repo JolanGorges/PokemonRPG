@@ -54,10 +54,10 @@ public static class Ui
         foreach (char c in message)
         {
             Console.Write(c);
-            Thread.Sleep(1);
+            Thread.Sleep(10);
         }
 
-        Thread.Sleep(1);
+        Thread.Sleep(1000);
         Console.CursorLeft = 0;
         Console.Write("".PadRight(message.Length, ' '));
     }
