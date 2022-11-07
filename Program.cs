@@ -1,3 +1,9 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿namespace PokemonRPG;
 
-Console.WriteLine("Hello, World!");
+internal static class Program
+{
+    public static void Main()
+    {
+        Game.New();
+    }
+}

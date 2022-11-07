@@ -5,24 +5,8 @@ namespace PokemonRPG.Data;
 
 public abstract class Pokemon
 {
-    public string Name { get; protected set; }
-    public Stat Hp { get; } = new();
-    public int MaxHp { get; private set; }
-    public Stat Attack { get; } = new();
-    public Stat Defense { get; } = new();
-    public Stat Speed { get; } = new();
-    public Stat Special { get; } = new();
-    private int ExpYield { get; }
-    public Type Type1 { get; }
-    public Type Type2 { get; }
-    public List<MoveClass> Moves { get; }
-    private GrowthRate GrowthRate { get; }
-    public int Level { get; private set; }
-    private int Exp { get; set; }
-    public Stat Accuracy { get; } = new();
-    public Stat Evasion { get; } = new();
-
-    protected Pokemon(string name, int hp, int attack, int defense, int speed, int special, Type type1, Type type2, int expYield, IEnumerable<Move> moves, int growthRate, int level)
+    protected Pokemon(string name, int hp, int attack, int defense, int speed, int special, Type type1, Type type2,
+        int expYield, IEnumerable<Move> moves, int growthRate, int level)
     {
         Name = name;
         Hp.Base = hp;
@@ -41,6 +25,23 @@ public abstract class Pokemon
         UpdateStats();
         Hp.Value = MaxHp;
     }
+
+    public string Name { get; protected set; }
+    public Stat Hp { get; } = new();
+    public int MaxHp { get; private set; }
+    public Stat Attack { get; } = new();
+    public Stat Defense { get; } = new();
+    public Stat Speed { get; } = new();
+    public Stat Special { get; } = new();
+    private int ExpYield { get; }
+    public Type Type1 { get; }
+    public Type Type2 { get; }
+    public List<MoveClass> Moves { get; }
+    private GrowthRate GrowthRate { get; }
+    public int Level { get; private set; }
+    private int Exp { get; set; }
+    public Stat Accuracy { get; } = new();
+    public Stat Evasion { get; } = new();
 
     public int GetNextLevelExp()
     {
@@ -63,12 +64,8 @@ public abstract class Pokemon
     private int CalculateLevel(int exp)
     {
         for (var i = 5; i < 255; i++)
-        {
             if (CalculateExp(i) > exp)
-            {
                 return i - 1;
-            }
-        }
         return 100;
     }
 
@@ -78,9 +75,7 @@ public abstract class Pokemon
         MaxHp = (int)(((Hp.Base + Hp.Iv) * 2 + Math.Ceiling(Math.Sqrt(Hp.Exp)) / 4) * Level) / 100 + Level + 10;
         var otherStats = new[] { Attack, Defense, Speed, Special };
         foreach (var stat in otherStats)
-        {
             stat.Value = (int)(((stat.Base + stat.Iv) * 2 + Math.Ceiling(Math.Sqrt(stat.Exp)) / 4) * Level) / 100 + 5;
-        }
     }
 
     private void CalculateIVs(int encounterRate = 25)
@@ -98,7 +93,7 @@ public abstract class Pokemon
         Defense.Iv = rand2 % 16;
         Speed.Iv = (rand1 >> 4) % 16;
         Special.Iv = rand1 % 16;
-        Hp.Iv = (Attack.Iv & 1) << 3 | (Defense.Iv & 1) << 2 | (Speed.Iv & 1) << 1 | (Special.Iv & 1);
+        Hp.Iv = ((Attack.Iv & 1) << 3) | ((Defense.Iv & 1) << 2) | ((Speed.Iv & 1) << 1) | (Special.Iv & 1);
     }
 
     public int AddExpGain(Pokemon defeatedPokemon)

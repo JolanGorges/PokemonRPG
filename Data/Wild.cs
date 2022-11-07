@@ -1,12 +1,12 @@
 ﻿using PokemonRPG.Enums;
 using Type = PokemonRPG.Enums.Type;
 
-
 namespace PokemonRPG.Data;
 
 public class Wild : Pokemon
 {
-    private Wild(string name, int hp, int attack, int defense, int speed, int special, Type type1, Type type2, int expYield, IEnumerable<Move> moves, int growthRate, int level) : base(name, hp, attack, defense,
+    private Wild(string name, int hp, int attack, int defense, int speed, int special, Type type1, Type type2,
+        int expYield, IEnumerable<Move> moves, int growthRate, int level) : base(name, hp, attack, defense,
         speed, special, type1, type2, expYield, moves, growthRate, level)
     {
     }
@@ -14,7 +14,9 @@ public class Wild : Pokemon
     public MoveClass GetRandomMove()
     {
         var damagingMoves = Moves.Where(move => move.Category == MoveCategory.Physical && move.Power > 0).ToArray();
-        return damagingMoves.Length > 0 ? damagingMoves[Random.Shared.Next(0, damagingMoves.Length)] : MoveClass.GetMove(Move.Struggle);
+        return damagingMoves.Length > 0
+            ? damagingMoves[Random.Shared.Next(0, damagingMoves.Length)]
+            : MoveClass.GetMove(Move.Struggle);
     }
 
     public static Wild GetRandom(int level)

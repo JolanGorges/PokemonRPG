@@ -12,6 +12,7 @@ public class Battle
     private readonly Wild _wildPokemon;
     private int _attempts;
     private int _round = 1;
+
     public Battle(Starter pokemon, Wild wildPokemon)
     {
         _pokemon = pokemon;
@@ -31,7 +32,6 @@ public class Battle
         Ui.ShowMenu(new Menu("Affronter un pokémon", new[]
         {
             new MenuItem("Attaquer", Fight),
-            new MenuItem("Changer de pokémon", Switch),
             new MenuItem($"Utiliser une potion ({_potions})", Potion),
             new MenuItem("Fuir", Escape)
         }));
@@ -44,15 +44,13 @@ public class Battle
         sb.AppendLine($"Manche : {_round}");
         foreach (var pokemon in pokemons)
         {
-#if DEBUG
             sb.AppendLine(
                 $"{pokemon.Name} HP: {pokemon.Hp.Value}/{pokemon.MaxHp} LV: {pokemon.Level} ATK: {pokemon.Attack.Value} DEF: {pokemon.Defense.Value} SPD: {pokemon.Speed.Value} SPC: {pokemon.Special.Value}          ");
+#if DEBUG
             sb.AppendLine(
                 $"BS: HP: {pokemon.Hp.Base} ATK: {pokemon.Attack.Base} DEF: {pokemon.Defense.Base} SPD: {pokemon.Speed.Base} SPC: {pokemon.Special.Base}");
             sb.AppendLine(
                 $"IV: HP: {pokemon.Hp.Iv} ATK: {pokemon.Attack.Iv} DEF: {pokemon.Defense.Iv} SPD: {pokemon.Speed.Iv} SPC: {pokemon.Special.Iv}");
-#else
-            sb.AppendLine($"{pokemon.Name} HP: {pokemon.Hp.Value}/{pokemon.MaxHp} LV: {pokemon.Level}          ");
 #endif
         }
 
@@ -73,8 +71,7 @@ public class Battle
             .ToList();
         Ui.ShowMenu(new Menu("Attaquer", menuItems.ToArray(), MainMenu));
     }
-
-
+    
     private void Round(MoveClass move)
     {
         if (move.PowerPoints <= 0)
@@ -89,13 +86,17 @@ public class Battle
         _pokemon.Defense.Current = (int)(_pokemon.Defense.Value * GetStageMultiplier(_pokemon.Defense.Stage));
         _pokemon.Speed.Current = (int)(_pokemon.Speed.Value * GetStageMultiplier(_pokemon.Speed.Stage));
         _pokemon.Special.Current = (int)(_pokemon.Special.Value * GetStageMultiplier(_pokemon.Special.Stage));
-        
+
         var wildMove = _wildPokemon.GetRandomMove();
         bool startsFirst;
         if (move.Move == Move.QuickAttack && wildMove.Move != Move.QuickAttack)
+        {
             startsFirst = true;
+        }
         else if (wildMove.Move == Move.QuickAttack && move.Move != Move.QuickAttack)
+        {
             startsFirst = false;
+        }
         else
         {
             if (_pokemon.Speed.Current == _wildPokemon.Speed.Current)
@@ -107,6 +108,7 @@ public class Battle
         if (startsFirst)
         {
             ExecuteMove(move, _pokemon, _wildPokemon);
+            move.PowerPoints--;
             if (_wildPokemon.Hp.Value == 0)
             {
                 WonBattle();
@@ -116,7 +118,7 @@ public class Battle
             ExecuteMove(wildMove, _wildPokemon, _pokemon);
             if (_pokemon.Hp.Value == 0)
             {
-                Ui.PrintNotification($"{_pokemon} est K.O. !");
+                Ui.PrintNotification($"{_pokemon.Name} est K.O. !");
                 return;
             }
         }
@@ -125,11 +127,12 @@ public class Battle
             ExecuteMove(wildMove, _wildPokemon, _pokemon);
             if (_pokemon.Hp.Value == 0)
             {
-                Ui.PrintNotification($"{_pokemon} est K.O. !");
+                Ui.PrintNotification($"{_pokemon.Name} est K.O. !");
                 return;
             }
 
             ExecuteMove(move, _pokemon, _wildPokemon);
+            move.PowerPoints--;
             if (_wildPokemon.Hp.Value == 0)
             {
                 WonBattle();
@@ -148,11 +151,12 @@ public class Battle
         int level = _pokemon.Level;
         int gain = _pokemon.AddExpGain(_wildPokemon);
         Ui.PrintNotification($"{_pokemon.Name} gagne {gain} points d'EXP !");
-        if(level != _pokemon.Level)
+        if (level != _pokemon.Level)
             Ui.PrintNotification($"{_pokemon.Name} monte au niveau {_pokemon.Level} !");
         AddPotion();
     }
-    private void AddPotion()
+
+    private static void AddPotion()
     {
         if (Random.Shared.NextDouble() > .75)
         {
@@ -160,11 +164,11 @@ public class Battle
             Ui.PrintNotification("Vous avez obtenu une potion !");
         }
     }
+
     private static void ExecuteMove(MoveClass move, Pokemon attacker, Pokemon defender)
     {
         Ui.PrintNotification(
             $"{attacker.Name} {(attacker is Wild ? "ennemi " : "")}lance {move.Name}");
-
         // https://bulbapedia.bulbagarden.net/wiki/Accuracy#Generation_I_and_II
         var accuracy = (int)(move.Accuracy * GetStageMultiplier(attacker.Accuracy.Stage - defender.Accuracy.Stage));
         accuracy = Math.Min(100, accuracy);
@@ -176,7 +180,9 @@ public class Battle
             defender.Hp.Value -= damage;
         }
         else
+        {
             Ui.PrintNotification("Mais échoue !");
+        }
     }
 
     private static double GetStageMultiplier(int stage)
@@ -203,18 +209,18 @@ public class Battle
     private static int CalculateDamage(MoveClass move, Pokemon attacker, Pokemon target)
     {
         // https://bulbapedia.bulbagarden.net/wiki/Damage
-
-        // https://bulbapedia.bulbagarden.net/wiki/Critical_hit#Probability
-
-
         // STAB & TYPE MATCH UP
         double type1Effectiveness = move.GetEffectiveness(target.Type1);
         double type2Effectiveness = target.Type1 == target.Type2 ? 1 : move.GetEffectiveness(target.Type2);
         double typeEffectiveness = type1Effectiveness * type2Effectiveness;
         if (typeEffectiveness >= 2)
+        {
             Ui.PrintNotification("C'est très efficace !");
+        }
         else if (typeEffectiveness <= 0.5)
+        {
             Ui.PrintNotification("Ce n'est pas très efficace...");
+        }
         else if (type1Effectiveness == 0)
         {
             Ui.PrintNotification($"Pas d'effet sur {target.Name} !");
@@ -223,9 +229,10 @@ public class Battle
 
         double stab = move.Type == attacker.Type1 || move.Type == attacker.Type2 ? 1.5 : 1;
 
+        // https://bulbapedia.bulbagarden.net/wiki/Critical_hit#Probability
         // CRITICAL HIT TEST
         var threshold = (int)(attacker.Speed.Base / (double)2);
-        
+
         if (move.HighCriticalHit)
             threshold = Math.Min(8 * threshold, 255);
 
@@ -233,7 +240,6 @@ public class Battle
         bool criticalHit = Random.Shared.Next(256) < threshold;
 
         // GET DAMAGE VARIABLES
-
         double a;
         double d;
         double level = criticalHit ? attacker.Level * 2 : attacker.Level;
@@ -254,7 +260,7 @@ public class Battle
             d = Math.Floor(d / 4) % 256;
         }
 
-        // 3. DAMAGE CALCULATION
+        // DAMAGE CALCULATION
 
         double damage = Math.Floor(Math.Floor(2 * level / 5 + 2) * Math.Max(1, a) * move.Power / Math.Max(1, d)) / 50;
         damage = Math.Min(997, damage) + 2;
@@ -271,21 +277,28 @@ public class Battle
 
         return (int)damage;
     }
-
-    private static void Switch()
-    {
-        throw new NotImplementedException();
-    }
-
+    
     private void Potion()
     {
         if (_potions > 0)
         {
             _pokemon.Hp.Value = Math.Min(_pokemon.MaxHp, _pokemon.Hp.Value + 20);
+            _potions--;
             Ui.PrintNotification("Vous avez utilisé une potion.");
+            var wildMove = _wildPokemon.GetRandomMove();
+            ExecuteMove(wildMove, _wildPokemon, _pokemon);
+            if (_pokemon.Hp.Value == 0)
+            {
+                Ui.PrintNotification($"{_pokemon.Name} est K.O. !");
+                return;
+            }
+            _round++;
         }
         else
+        {
             Ui.PrintNotification("Vous n'avez pas de potion !");
+        }
+
         MainMenu();
     }
 
@@ -302,6 +315,14 @@ public class Battle
         }
 
         Ui.PrintNotification("Fuite impossible !");
+        var wildMove = _wildPokemon.GetRandomMove();
+        ExecuteMove(wildMove, _wildPokemon, _pokemon);
+        if (_pokemon.Hp.Value == 0)
+        {
+            Ui.PrintNotification($"{_pokemon.Name} est K.O. !");
+            return;
+        }
+        _round++;
         MainMenu();
     }
 }

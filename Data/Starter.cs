@@ -5,6 +5,8 @@ namespace PokemonRPG.Data;
 
 public class Starter : Pokemon
 {
+    private StarterPokemon _currentEvolution;
+
     private Starter(StarterPokemon currentEvolution, string name, int hp, int attack, int defense, int speed,
         int special, Type type1, Type type2,
         IEnumerable<Move> moves, int growthRate) : base(name, hp, attack, defense,
@@ -12,8 +14,6 @@ public class Starter : Pokemon
     {
         _currentEvolution = currentEvolution;
     }
-
-    private StarterPokemon _currentEvolution;
 
     public void CheckEvolutionsAndMoves()
     {

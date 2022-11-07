@@ -6,6 +6,7 @@ public enum Move
     KarateChop,
     Doubleslap,
     CometPunch,
+
     // MegaPunch,
     // PayDay,
     // FirePunch,
@@ -13,18 +14,22 @@ public enum Move
     // Thunderpunch,
     Scratch,
     Vicegrip,
+
     // Guillotine,
     // RazorWind,
     // SwordsDance,
     // Cut,
     Gust,
+
     // WingAttack,
     // Whirlwind,
     // Fly,
     Bind,
+
     // Slam,
     VineWhip,
     Stomp,
+
     // DoubleKick,
     // MegaKick,
     // JumpKick,
@@ -33,15 +38,19 @@ public enum Move
     Headbutt,
     HornAttack,
     FuryAttack,
+
     // HornDrill,
     Tackle,
+
     // BodySlam,
     Wrap,
+
     // TakeDown,
     // Thrash,
     // DoubleEdge,
     TailWhip,
     PoisonSting,
+
     // Twineedle,
     // PinMissile,
     Leer,
@@ -49,11 +58,13 @@ public enum Move
     Growl,
     Roar,
     Sing,
+
     // Supersonic,
     Sonicboom,
     Disable,
     Acid,
     Ember,
+
     // Flamethrower,
     // Mist,
     // WaterGun,
@@ -64,60 +75,77 @@ public enum Move
     // Psybeam,
     // Bubblebeam,
     AuroraBeam,
+
     // HyperBeam,
     Peck,
+
     // DrillPeck,
     // Submission,
     LowKick,
+
     // Counter,
     // SeismicToss,
     // Strength,
     Absorb,
+
     // MegaDrain,
     // LeechSeed,
     Growth,
     RazorLeaf,
+
     // Solarbeam,
     Poisonpowder,
     StunSpore,
+
     // SleepPowder,
     // PetalDance,
     StringShot,
+
     // DragonRage,
     // FireSpin,
     Thundershock,
+
     // Thunderbolt,
     ThunderWave,
+
     // Thunder,
     // RockThrow,
     // Earthquake,
     // Fissure,
     Dig,
+
     // Toxic,
     Confusion,
+
     // PsychicM,
     Hypnosis,
+
     // Meditate,
     // Agility,
     QuickAttack,
     Rage,
     Teleport,
     NightShade,
+
     // Mimic,
     Screech,
+
     // DoubleTeam,
     // Recover,
     Harden,
+
     // Minimize,
     Smokescreen,
     ConfuseRay,
     Withdraw,
     DefenseCurl,
+
     // Barrier,
     // LightScreen,
     // Haze,
     // Reflect,
     FocusEnergy,
+
     // Bide,
     // Metronome,
     // MirrorMove,
@@ -127,13 +155,16 @@ public enum Move
     Smog,
     Sludge,
     BoneClub,
+
     // FireBlast,
     // Waterfall,
     // Clamp,
     // Swift,
     SkullBash,
+
     // SpikeCannon,
     Constrict,
+
     // Amnesia,
     // Kinesis,
     // Softboiled,
@@ -143,10 +174,12 @@ public enum Move
     PoisonGas,
     Barrage,
     LeechLife,
+
     // LovelyKiss,
     // SkyAttack,
     Transform,
     Bubble,
+
     // DizzyPunch,
     // Spore,
     // Flash,
@@ -165,6 +198,7 @@ public enum Move
     // TriAttack,
     // SuperFang,
     Slash,
+
     // Substitute,
     Struggle
 }

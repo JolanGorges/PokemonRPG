@@ -2,9 +2,14 @@
 
 public class Stat
 {
+    private int _current;
+    private int _exp;
+
+    private int _stage;
+
+    private int _value;
     public int Base { get; set; }
     public int Iv { get; set; }
-    private int _exp;
 
     public int Exp
     {
@@ -12,15 +17,11 @@ public class Stat
         set => _exp = value > ushort.MaxValue ? ushort.MaxValue : value;
     }
 
-    private int _value;
-
     public int Value
     {
         get => _value;
         set => _value = value < 0 ? 0 : value;
     }
-
-    private int _current;
 
     public int Current
     {
@@ -35,8 +36,6 @@ public class Stat
                 _current = value;
         }
     }
-
-    private int _stage;
 
     public int Stage
     {

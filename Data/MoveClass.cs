@@ -1,21 +1,10 @@
 ﻿using PokemonRPG.Enums;
+using Type = PokemonRPG.Enums.Type;
 
 namespace PokemonRPG.Data;
 
-using Type = Enums.Type;
-
 public class MoveClass
 {
-    public Move Move { get; }
-    public string Name { get; }
-    public int Power { get; }
-    public Type Type { get; }
-    public int Accuracy { get; }
-    public int PowerPoints { get; set; }
-    public int MaxPowerPoints { get; }
-    public bool HighCriticalHit { get; }
-    public MoveCategory Category { get; }
-
     private MoveClass(Move move, string name, int power, Type type, int accuracy, int powerPoints,
         bool highCriticalHit = false)
     {
@@ -38,6 +27,16 @@ public class MoveClass
                  or Type.Dragon)
             Category = MoveCategory.Special;
     }
+
+    public Move Move { get; }
+    public string Name { get; }
+    public int Power { get; }
+    public Type Type { get; }
+    public int Accuracy { get; }
+    public int PowerPoints { get; set; }
+    public int MaxPowerPoints { get; }
+    public bool HighCriticalHit { get; }
+    public MoveCategory Category { get; }
 
     public double GetEffectiveness(Type pokemonType)
     {

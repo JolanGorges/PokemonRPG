@@ -8,9 +8,11 @@ public enum Type
     Poison,
     Ground,
     Rock,
+
     // Bird,
     Bug,
     Ghost,
+
     // Steel,
     Fire,
     Water,
@@ -18,6 +20,7 @@ public enum Type
     Electric,
     Psychic,
     Ice,
+
     Dragon
     // Dark,
 }

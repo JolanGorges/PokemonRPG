@@ -7,6 +7,7 @@ namespace PokemonRPG;
 public static class Game
 {
     private static Starter _pokemon = null!;
+
     public static void New()
     {
         Ui.ShowMenu(new Menu("Choisis ton pokémon", new[]

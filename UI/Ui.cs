@@ -6,6 +6,7 @@ public static class Ui
     private static int _menuPosition;
     private static int _selectedIndex;
     private static Menu _menu = null!;
+
     public static void ShowMenu(Menu menu, bool clearConsole = false)
     {
         if (clearConsole)
@@ -39,7 +40,7 @@ public static class Ui
     private static void ClearMenu()
     {
         Console.SetCursorPosition(0, _titlePosition);
-        for(int i = _titlePosition; i <= _menuPosition; i++)
+        for (int i = _titlePosition; i <= _menuPosition; i++)
             Console.WriteLine("".PadRight(Console.BufferWidth, ' '));
         Console.SetCursorPosition(0, _menuPosition);
         foreach (var menuItem in _menu.MenuItems)
@@ -60,9 +61,13 @@ public static class Ui
         Console.CursorLeft = 0;
         Console.Write("".PadRight(message.Length, ' '));
     }
+
     private static bool HandleKey()
     {
-        var key = Console.ReadKey(false).Key;
+        while (Console.KeyAvailable) {
+            Console.ReadKey(true);
+        }   
+        var key = Console.ReadKey(true).Key;
         switch (key)
         {
             case ConsoleKey.Enter:
