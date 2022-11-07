@@ -2,11 +2,8 @@
 
 public class Stat
 {
-    private int _current;
     private int _exp;
-
-    private int _stage;
-
+    
     private int _value;
     public int Base { get; set; }
     public int Iv { get; set; }
@@ -21,33 +18,5 @@ public class Stat
     {
         get => _value;
         set => _value = value < 0 ? 0 : value;
-    }
-
-    public int Current
-    {
-        get => _current;
-        set
-        {
-            if (value > 999)
-                _current = 999;
-            else if (value < 1)
-                _current = 1;
-            else
-                _current = value;
-        }
-    }
-
-    public int Stage
-    {
-        get => _stage;
-        set
-        {
-            if (value > 6)
-                _stage = 6;
-            else if (value < -6)
-                _stage = -6;
-            else
-                _stage = value;
-        }
     }
 }

@@ -8,22 +8,17 @@ namespace PokemonRPG;
 public class Battle
 {
     private static int _potions;
-    private readonly Starter _pokemon;
-    private readonly Wild _wildPokemon;
+    private static int _pokeballs;
+    private readonly List<Pokemon> _party;
+    private int _pokemonIndex;
+    private readonly Pokemon _wildPokemon;
     private int _attempts;
     private int _round = 1;
 
-    public Battle(Starter pokemon, Wild wildPokemon)
+    public Battle(List<Pokemon> party, Pokemon wildPokemon)
     {
-        _pokemon = pokemon;
+        _party = party;
         _wildPokemon = wildPokemon;
-        _pokemon.Hp.Stage = 0;
-        _pokemon.Attack.Stage = 0;
-        _pokemon.Defense.Stage = 0;
-        _pokemon.Speed.Stage = 0;
-        _pokemon.Special.Stage = 0;
-        _pokemon.Accuracy.Stage = 0;
-        _pokemon.Evasion.Stage = 0;
     }
 
     public void MainMenu()
@@ -32,25 +27,42 @@ public class Battle
         Ui.ShowMenu(new Menu("Affronter un pokémon", new[]
         {
             new MenuItem("Attaquer", Fight),
+            new MenuItem("Changer de pokemon", Switch),
             new MenuItem($"Utiliser une potion ({_potions})", Potion),
+            new MenuItem($"Utiliser une pokeball ({_pokeballs})", Pokeball),
             new MenuItem("Fuir", Escape)
         }));
     }
 
+    private void Switch()
+    {
+        var menuItems = new MenuItem[_party.Count];
+        for (var i = 0; i < _party.Count; i++)
+        {
+            int index = i;
+            menuItems[i] =
+                new MenuItem(
+                    $"{_party[i].Name} HP: {_party[i].Hp.Value}/{_party[i].MaxHp} LV: {_party[i].Level} ATK: {_party[i].Attack.Value} DEF: {_party[i].Defense.Value} SPD: {_party[i].Speed.Value}",
+                    () => _pokemonIndex = index);
+        }
+
+        Ui.ShowMenu(new Menu("Changer de pokemon", menuItems, MainMenu));
+    }
+
     private void ShowStatistics()
     {
-        Pokemon[] pokemons = { _pokemon, _wildPokemon };
+        Pokemon[] pokemons = { _party[_pokemonIndex], _wildPokemon };
         StringBuilder sb = new();
         sb.AppendLine($"Manche : {_round}");
         foreach (var pokemon in pokemons)
         {
             sb.AppendLine(
-                $"{pokemon.Name} HP: {pokemon.Hp.Value}/{pokemon.MaxHp} LV: {pokemon.Level} ATK: {pokemon.Attack.Value} DEF: {pokemon.Defense.Value} SPD: {pokemon.Speed.Value} SPC: {pokemon.Special.Value}          ");
+                $"{pokemon.Name} HP: {pokemon.Hp.Value}/{pokemon.MaxHp} LV: {pokemon.Level} ATK: {pokemon.Attack.Value} DEF: {pokemon.Defense.Value} SPD: {pokemon.Speed.Value}            ");
 #if DEBUG
             sb.AppendLine(
-                $"BS: HP: {pokemon.Hp.Base} ATK: {pokemon.Attack.Base} DEF: {pokemon.Defense.Base} SPD: {pokemon.Speed.Base} SPC: {pokemon.Special.Base}");
+                $"BS: HP: {pokemon.Hp.Base} ATK: {pokemon.Attack.Base} DEF: {pokemon.Defense.Base} SPD: {pokemon.Speed.Base}");
             sb.AppendLine(
-                $"IV: HP: {pokemon.Hp.Iv} ATK: {pokemon.Attack.Iv} DEF: {pokemon.Defense.Iv} SPD: {pokemon.Speed.Iv} SPC: {pokemon.Special.Iv}");
+                $"IV: HP: {pokemon.Hp.Iv} ATK: {pokemon.Attack.Iv} DEF: {pokemon.Defense.Iv} SPD: {pokemon.Speed.Iv}");
 #endif
         }
 
@@ -65,13 +77,13 @@ public class Battle
         ShowStatistics();
 
         // For now, only use attacks that do damage because the effects are not implemented
-        var menuItems = _pokemon.Moves
+        var menuItems = _party[_pokemonIndex].Moves
             .Where(move => move.Category == MoveCategory.Physical && move.Power > 0)
             .Select(move => new MenuItem($"{move.Name} ({move.PowerPoints}/{move.MaxPowerPoints})", () => Round(move)))
             .ToList();
         Ui.ShowMenu(new Menu("Attaquer", menuItems.ToArray(), MainMenu));
     }
-    
+
     private void Round(MoveClass move)
     {
         if (move.PowerPoints <= 0)
@@ -81,11 +93,6 @@ public class Battle
             return;
         }
 
-        _pokemon.Hp.Current = (int)(_pokemon.Hp.Value * GetStageMultiplier(_pokemon.Hp.Stage));
-        _pokemon.Attack.Current = (int)(_pokemon.Attack.Value * GetStageMultiplier(_pokemon.Attack.Stage));
-        _pokemon.Defense.Current = (int)(_pokemon.Defense.Value * GetStageMultiplier(_pokemon.Defense.Stage));
-        _pokemon.Speed.Current = (int)(_pokemon.Speed.Value * GetStageMultiplier(_pokemon.Speed.Stage));
-        _pokemon.Special.Current = (int)(_pokemon.Special.Value * GetStageMultiplier(_pokemon.Special.Stage));
 
         var wildMove = _wildPokemon.GetRandomMove();
         bool startsFirst;
@@ -99,38 +106,39 @@ public class Battle
         }
         else
         {
-            if (_pokemon.Speed.Current == _wildPokemon.Speed.Current)
+            if (_party[_pokemonIndex].Speed.Value == _wildPokemon.Speed.Value)
                 startsFirst = Random.Shared.Next(2) == 0;
             else
-                startsFirst = _pokemon.Speed.Current > _wildPokemon.Speed.Current;
+                startsFirst = _party[_pokemonIndex].Speed.Value > _wildPokemon.Speed.Value;
         }
 
         if (startsFirst)
         {
-            ExecuteMove(move, _pokemon, _wildPokemon);
+            ExecuteMove(move, _party[_pokemonIndex], _wildPokemon);
             move.PowerPoints--;
             if (_wildPokemon.Hp.Value == 0)
             {
                 WonBattle();
                 return;
             }
-            ExecuteMove(wildMove, _wildPokemon, _pokemon);
-            if (_pokemon.Hp.Value == 0)
+
+            ExecuteMove(wildMove, _wildPokemon, _party[_pokemonIndex]);
+            if (_party[_pokemonIndex].Hp.Value == 0)
             {
-                Ui.PrintNotification($"{_pokemon.Name} est K.O. !");
+                Ui.PrintNotification($"{_party[_pokemonIndex].Name} est K.O. !");
                 return;
             }
         }
         else
         {
-            ExecuteMove(wildMove, _wildPokemon, _pokemon);
-            if (_pokemon.Hp.Value == 0)
+            ExecuteMove(wildMove, _wildPokemon, _party[_pokemonIndex]);
+            if (_party[_pokemonIndex].Hp.Value == 0)
             {
-                Ui.PrintNotification($"{_pokemon.Name} est K.O. !");
+                Ui.PrintNotification($"{_party[_pokemonIndex].Name} est K.O. !");
                 return;
             }
 
-            ExecuteMove(move, _pokemon, _wildPokemon);
+            ExecuteMove(move, _party[_pokemonIndex], _wildPokemon);
             move.PowerPoints--;
             if (_wildPokemon.Hp.Value == 0)
             {
@@ -146,32 +154,36 @@ public class Battle
     private void WonBattle()
     {
         Ui.PrintNotification($"Le {_wildPokemon.Name} ennemi est K.O. !");
-        _pokemon.CheckEvolutionsAndMoves();
-        int level = _pokemon.Level;
-        int gain = _pokemon.AddExpGain(_wildPokemon);
-        Ui.PrintNotification($"{_pokemon.Name} gagne {gain} points d'EXP !");
-        if (level != _pokemon.Level)
-            Ui.PrintNotification($"{_pokemon.Name} monte au niveau {_pokemon.Level} !");
-        AddPotion();
+        _party[_pokemonIndex].CheckEvolutionsAndMoves();
+        int level = _party[_pokemonIndex].Level;
+        int gain = _party[_pokemonIndex].AddExpGain(_wildPokemon);
+        Ui.PrintNotification($"{_party[_pokemonIndex].Name} gagne {gain} points d'EXP !");
+        if (level != _party[_pokemonIndex].Level)
+            Ui.PrintNotification($"{_party[_pokemonIndex].Name} monte au niveau {_party[_pokemonIndex].Level} !");
+        AddPotionPokeball();
     }
 
-    private static void AddPotion()
+    private static void AddPotionPokeball()
     {
         if (Random.Shared.NextDouble() > .75)
         {
             _potions++;
             Ui.PrintNotification("Vous avez obtenu une potion !");
         }
+
+        if (Random.Shared.NextDouble() > .75)
+        {
+            _pokeballs++;
+            Ui.PrintNotification("Vous avez obtenu une pokeball !");
+        }
     }
 
     private static void ExecuteMove(MoveClass move, Pokemon attacker, Pokemon defender)
     {
         Ui.PrintNotification(
-            $"{attacker.Name} {(attacker is Wild ? "ennemi " : "")}lance {move.Name}");
+            $"{attacker.Name} {(attacker.IsWild ? "ennemi " : "")}lance {move.Name}");
         // https://bulbapedia.bulbagarden.net/wiki/Accuracy#Generation_I_and_II
-        var accuracy = (int)(move.Accuracy * GetStageMultiplier(attacker.Accuracy.Stage - defender.Accuracy.Stage));
-        accuracy = Math.Min(100, accuracy);
-        bool missed = Random.Shared.Next(100) < accuracy;
+        bool missed = Random.Shared.Next(100) < move.Accuracy;
 
         if (missed)
         {
@@ -184,26 +196,6 @@ public class Battle
         }
     }
 
-    private static double GetStageMultiplier(int stage)
-    {
-        return stage switch
-        {
-            -6 => 25 / 100,
-            -5 => 28 / 100,
-            -4 => 33 / 100,
-            -3 => 40 / 100,
-            -2 => 50 / 100,
-            -1 => 66 / 100,
-            0 => 1 / 1,
-            1 => 15 / 10,
-            2 => 2 / 1,
-            3 => 25 / 10,
-            4 => 3 / 1,
-            5 => 35 / 10,
-            6 => 4 / 1,
-            _ => throw new ArgumentOutOfRangeException(nameof(stage), stage, null)
-        };
-    }
 
     private static int CalculateDamage(MoveClass move, Pokemon attacker, Pokemon target)
     {
@@ -239,19 +231,11 @@ public class Battle
         bool criticalHit = Random.Shared.Next(256) < threshold;
 
         // GET DAMAGE VARIABLES
-        double a;
-        double d;
         double level = criticalHit ? attacker.Level * 2 : attacker.Level;
-        if (move.Category == MoveCategory.Physical)
-        {
-            a = criticalHit ? attacker.Attack.Current : attacker.Attack.Value;
-            d = criticalHit ? attacker.Defense.Current : attacker.Defense.Value;
-        }
-        else
-        {
-            a = criticalHit ? attacker.Special.Current : attacker.Special.Value;
-            d = a;
-        }
+
+        double a = attacker.Attack.Value;
+        double d = attacker.Defense.Value;
+
 
         if (a > 255 || d > 255)
         {
@@ -276,21 +260,57 @@ public class Battle
 
         return (int)damage;
     }
-    
+
+    private void Pokeball()
+    {
+        if (_pokeballs > 0)
+        {
+            _pokeballs--;
+            // https://bulbapedia.bulbagarden.net/wiki/Catch_rate#Capture_method_.28Generation_I.29
+            int r1 = Random.Shared.Next(0, 256);
+            int f = Math.Min(255, _wildPokemon.MaxHp * 255 * 4 / (_wildPokemon.Hp.Value * 12));
+            int r2 = Random.Shared.Next(0, 256);
+            if (_wildPokemon.CatchRate < r1 && r2 > f)
+            {
+                Ui.PrintNotification($"Vous n'avez pas réussi à attraper {_wildPokemon.Name} !");
+                var wildMove = _wildPokemon.GetRandomMove();
+                ExecuteMove(wildMove, _wildPokemon, _party[_pokemonIndex]);
+                if (_party[_pokemonIndex].Hp.Value == 0)
+                {
+                    Ui.PrintNotification($"{_party[_pokemonIndex].Name} est K.O. !");
+                    return;
+                }
+                _round++;
+            }
+            else
+            {
+                _wildPokemon.IsWild = false;
+                _party.Add(_wildPokemon);
+                Ui.PrintNotification($"Vous avez attrapé {_wildPokemon.Name} !");
+            }
+        }
+        else
+        {
+            Ui.PrintNotification("Vous n'avez pas de pokeball !");
+            MainMenu();
+        }
+    }
+
     private void Potion()
     {
         if (_potions > 0)
         {
-            _pokemon.Hp.Value = Math.Min(_pokemon.MaxHp, _pokemon.Hp.Value + 20);
+            _party[_pokemonIndex].Hp.Value = Math.Min(_party[_pokemonIndex].MaxHp, _party[_pokemonIndex].Hp.Value + 20);
             _potions--;
             Ui.PrintNotification("Vous avez utilisé une potion.");
             var wildMove = _wildPokemon.GetRandomMove();
-            ExecuteMove(wildMove, _wildPokemon, _pokemon);
-            if (_pokemon.Hp.Value == 0)
+            ExecuteMove(wildMove, _wildPokemon, _party[_pokemonIndex]);
+            if (_party[_pokemonIndex].Hp.Value == 0)
             {
-                Ui.PrintNotification($"{_pokemon.Name} est K.O. !");
+                Ui.PrintNotification($"{_party[_pokemonIndex].Name} est K.O. !");
                 return;
             }
+
             _round++;
         }
         else
@@ -306,7 +326,7 @@ public class Battle
         // https://bulbapedia.bulbagarden.net/wiki/Escape#Generation_I_and_II
         int odds = _wildPokemon.Speed.Value / 4 % 256 == 0
             ? 256
-            : _pokemon.Speed.Value * 32 / (_wildPokemon.Speed.Value / 4 % 256) + 30 + _attempts++;
+            : _party[_pokemonIndex].Speed.Value * 32 / (_wildPokemon.Speed.Value / 4 % 256) + 30 + _attempts++;
         if (odds > 255 || Random.Shared.Next(256) < odds)
         {
             Ui.PrintNotification("Vous prenez la fuite !");
@@ -315,12 +335,13 @@ public class Battle
 
         Ui.PrintNotification("Fuite impossible !");
         var wildMove = _wildPokemon.GetRandomMove();
-        ExecuteMove(wildMove, _wildPokemon, _pokemon);
-        if (_pokemon.Hp.Value == 0)
+        ExecuteMove(wildMove, _wildPokemon, _party[_pokemonIndex]);
+        if (_party[_pokemonIndex].Hp.Value == 0)
         {
-            Ui.PrintNotification($"{_pokemon.Name} est K.O. !");
+            Ui.PrintNotification($"{_party[_pokemonIndex].Name} est K.O. !");
             return;
         }
+
         _round++;
         MainMenu();
     }
